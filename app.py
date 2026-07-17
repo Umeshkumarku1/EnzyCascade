@@ -2,41 +2,31 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import os
-import time
 
-# Set modern, wide page layout
-st.set_page_config(
-    page_title="EnzyCascade™ | Diagnostic Portal",
-    page_icon="🧬",
-    layout="wide"
-)
+# Configuration
+st.set_page_config(page_title="EnzyCascade™ | Diagnostic Portal", page_icon="🧬", layout="wide")
 
-st.markdown('<p style="font-size: 2.8rem; font-weight: 800; color: #1E3A8A;">EnzyCascade™</p>', unsafe_allow_html=True)
+st.markdown('<p style="font-size: 2.8rem; font-weight: 800; color: #1E3A8A;">EnzyCascade™</p>', unsafe_html=True)
 st.markdown("---")
 
-# Paths - Now only looking for the database
 DB_PATH = "phenotype_database-v2.xlsx"
 COMMUNITY_TXT_PATH = "bacterial community.txt"
 
 @st.cache_data
 def load_db():
-    if not os.path.exists(DB_PATH):
-        return None
-    try:
-        df = pd.read_excel(DB_PATH, sheet_name=0)
-        return df
-    except Exception:
-        return None
+    if not os.path.exists(DB_PATH): return None
+    try: return pd.read_excel(DB_PATH, sheet_name=0)
+    except: return None
 
 def load_allowed_community():
     if os.path.exists(COMMUNITY_TXT_PATH):
         try:
             with open(COMMUNITY_TXT_PATH, 'r', encoding='utf-8') as f:
                 return [line.strip().lower() for line in f.readlines() if line.strip()]
-        except Exception:
-            return []
+        except: return []
     return []
 
+# App Logic
 try:
     df = load_db()
     allowed_community = load_allowed_community()
@@ -45,17 +35,15 @@ try:
         st.error(f"⚠️ Database '{DB_PATH}' not found in the root directory.")
         st.stop()
 
-    # Get features excluding the strain name
     feature_list = [c for c in df.columns if "strain" not in c.lower() and "name" not in c.lower()]
 
     st.sidebar.markdown("### 📊 Engine Status")
     st.success("Database Loaded Successfully")
-    enable_web_lookup = st.sidebar.checkbox("Enable Automated Web Profile Fetching", value=True)
 
     st.markdown("### 📋 Phase 1: Observed Laboratory Profiles")
     user_inputs = {}
-    
     col1, col2, col3 = st.columns(3)
+    
     with col1:
         choice = st.selectbox("Gram stain:", ["Not Performed", "Gram-negative", "Gram-positive"])
         user_inputs["Gram stain"] = "gramnegativenegative" if choice == "Gram-negative" else ("positive" if choice == "Gram-positive" else -1.0)
@@ -68,7 +56,6 @@ try:
 
     st.markdown("### 🧬 Phase 2: Enzyme Cascade Matrix")
     remaining_features = [f for f in feature_list if f not in ["Gram stain", "Shape", "color"]]
-    
     cols = st.columns(4)
     for i, feat in enumerate(remaining_features):
         with cols[i % 4]:
@@ -95,9 +82,10 @@ try:
                     e_total += 1
                     if str(row.get(f, "")).lower() == v: e_match += 1
             score += (e_match / e_total * 30.0) if e_total > 0 else 30.0
-            results.append({"Strain": strain_name.title(), "Match (%)": round(score, 2)})
+            results.append({"Strain": strain_name.title(), "Match_Percent": round(score, 2)})
             
-        res = pd.DataFrame(results).sort_values("Match (%)", ascending=False).head(3)
+        res = pd.DataFrame(results).sort_values("Match_Percent", ascending=False).head(3)
+        res.columns = ["Strain", "Match (%)"]
         st.dataframe(res, use_container_width=True)
 
 except Exception as e:
