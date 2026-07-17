@@ -1,0 +1,75 @@
+strains.Full Scientific Name	Gram stain	Shape	color
+Acinetobacter baumannii 	Gram-Gram-negative	rod	white
+Acinetobacter johnsonii 	Gram-Gram-negative	rod	white
+Acinetobacter sp.	Gram-Gram-negative	rod	white
+Alcaligenes faecalis 	Gram-negative	Rod	white
+Alcaligenes faecalis subsp. faecalis 	Gram-negative	Rod	white
+Alcaligenes faecalis subsp. parafaecalis 	Gram-negative	Rod	white
+Alcaligenes faecalis subsp. phenolicus 	Gram-negative	Rod	white
+Halomonas aquamarina 	Gram-negative	Rod	white
+Halomonas axialensis 	Gram-negative	Rod	white
+Halomonas meridiana	Gram-negative	Rod	white
+Arthrobacter globiformis	Gram-positive	Rod	yellow
+Bacillus cereus 	Gram-positive	Rod	white
+Bacillus licheniformis 	Gram-positive	Rod	white
+Bacillus sp.	Gram-positive	Rod	white
+Priestia megaterium	Gram-positive	Rod	white
+Burkholderia cepacia 	Gram-negative	Rod	yellow
+Cellulomonas fimi	Gram-positive	Rod	yellow
+Citrobacter freundii 	Gram-negative	Rod	white
+Clostridium perfringens	Gram-positive	Rod	gray
+Clostridium sporogenes 	Gram-positive	Rod	white
+Corynebacterium diphtheriae 	Gram-positive	Club-shaped rod	white
+Corynebacterium glutamicum 	Gram-positive	Club-shaped rod	yellow
+Enterobacter cloacae	Gram-negative	Rod	white
+Enterobacter cloacae subsp. cloacae 	Gram-negative	Rod	white
+Enterobacter cloacae subsp. Dissolvens	Gram-negative	Rod	white
+Enterobacter sp.	Gram-negative	Rod	white
+Escherichia coli 	Gram-negative	Rod	white
+Klebsiella pneumoniae	Gram-negative	Rod	white
+Enterococcus faecalis	Gram-positive	Coccus	white
+Enterococcus faecium	Gram-positive	Coccus	white
+Flavobacterium johnsoniae subsp. Johnsoniae	Gram-negative	Rod	Yellow
+Geobacillus sp.	Gram-positive	Rod	white
+Geobacillus stearothermophilus	Gram-positive	Rod	white
+Lacticaseibacillus casei 	Gram-positive	Rod	white
+Lacticaseibacillus paracasei subsp. tolerans 	Gram-positive	Rod	white
+Lacticaseibacillus rhamnosus	Gram-positive	Rod	white
+Lactiplantibacillus argentoratensis 	Gram-positive	Rod	white
+Lactiplantibacillus plantarum subsp. plantarum 	Gram-positive	Rod	white
+Lactococcus cremoris subsp. tructae 	Gram-positive	Coccus	white
+Lactococcus lactis	Gram-positive	Coccus	white
+Lactococcus lactis subsp. Hordniae	Gram-positive	Coccus	white
+Leuconostoc mesenteroides 	Gram-positive	Coccus	white
+Leuconostoc mesenteroides subsp. cremoris 	Gram-positive	Coccus	white
+Leuconostoc mesenteroides subsp. dextranicum 	Gram-positive	Coccus	white
+Leuconostoc mesenteroides subsp. Mesenteroides	Gram-positive	Coccus	white
+Leuconostoc suionicum 	Gram-positive	Coccus	white
+Micrococcus luteus 	Gram-positive	Coccus	yellow
+Morganella morganii 	Gram-negative	Rod	white
+Morganella morganii subsp. morganii 	Gram-negative	Rod	white
+Morganella morganii subsp. Sibonii	Gram-negative	Rod	white
+Paenibacillus polymyxa 	Gram-positive	Rod	white
+Pediococcus pentosaceus 	Gram-positive	Coccus	white
+Proteus mirabilis 	Gram-negative	Rod	white
+Shigella flexneri 	Gram-negative	Rod	white
+Proteus vulgaris Hauser 	Gram-negative	Rod	gray
+Pseudomonas aeruginosa 	Gram-negative	Rod	green
+Pseudomonas putida 	Gram-negative	Rod	white
+Rhodococcus baikonurensis 	Gram-positive	Coccoid rod	pink
+Rhodococcus erythropolis 	Gram-positive	Coccoid rod	pink
+Rhodococcus qingshengii	Gram-positive	Coccoid rod	pink
+Salmonella bongori 	Gram-negative	Rod	white
+Salmonella enterica 	Gram-negative	Rod	white
+Serratia marcescens 	Gram-negative	Rod	red
+Shigella flexneri 	Gram-negative	Rod	white
+Pediococcus pentosaceus	Gram-negative	Rod	yellow
+Sphingomonas paucimobilis	Gram-negative	Rod	yellow
+Staphylococcus aureus	Gram-positive	Coccus	yellow
+Staphylococcus epidermidis 	Gram-positive	Coccus	white
+Staphylococcus saprophyticus subsp. bovis 	Gram-positive	Coccus	white
+Staphylococcus saprophyticus subsp. saprophyticus 	Gram-positive	Coccus	white
+Stenotrophomonas maltophilia	Gram-negative	Rod	yellow
+Streptococcus agalactiae 	Gram-positive	Coccus	gray
+Streptococcus pyogenes 	Gram-positive	Coccus	white
+Streptomyces albidoflavus 	Gram-positive	Filamentous	gray
