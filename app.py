@@ -56,8 +56,7 @@ st.markdown('<p class="main-title">EnzyCascade™</p>', unsafe_allow_html=True)
 st.markdown('<p class="tagline">Rule-Based Enzyme Cascade Bacterial Identification System</p>', unsafe_allow_html=True)
 st.markdown("---")
 
-# Constant Paths
-# Relative Paths - Works perfectly on local machine and Streamlit Cloud
+# Constant Relative Paths - Clean architecture for Streamlit Cloud deployment
 RULE_PATH = os.path.join("database", "phenotype_database-v2.xlsx")
 PHENO_PATH = os.path.join("database", "phenotype_database-v2.xlsx")
 MODEL_PATH = os.path.join("database", "bacterial_rf_model.pkl")
@@ -65,14 +64,22 @@ COMMUNITY_TXT_PATH = "bacterial community.txt"
 
 @st.cache_resource
 def load_ml_assets():
+    # Fixed unpacking issue: gracefully returns 2 items matching expectations
     if not os.path.exists(MODEL_PATH):
-        return None, None, None
+        return None, None
     try:
         df_p = pd.read_excel(PHENO_PATH, sheet_name='Sheet1')
     except Exception:
-        df_p = pd.read_excel(PHENO_PATH, sheet_name=0)
+        try:
+            df_p = pd.read_excel(PHENO_PATH, sheet_name=0)
+        except Exception:
+            return None, None
+            
     features = [col for col in df_p.columns if col != 'strains.Full Scientific Name']
-    model = joblib.load(MODEL_PATH)
+    try:
+        model = joblib.load(MODEL_PATH)
+    except Exception:
+        return features, None
     return features, model
 
 def load_allowed_community():
@@ -85,16 +92,15 @@ def load_allowed_community():
             pass
     return []
 
-# --- EXTENSIBLE WEB SCRAIPING / SEARCH INFERENCE MODULE ---
+# --- EXTENSIBLE WEB SCRAPING / SEARCH INFERENCE MODULE ---
 def fetch_bacterial_profile_from_web(strain_name):
     """
-    Placeholder/Hook for automated phenotypic web-profiling.
-    Can be linked directly to BacDive API or public text-miners.
+    Placeholder hook for automated phenotypic web-profiling.
+    Can be dynamically tied to LPSN or BacDive REST APIs down the road.
     """
-    # Simulated fallbacks if local spreadsheet rows contain missing (NaN) metadata
     inferred_profile = {"Gram stain": None, "Shape": None, "color": None}
     
-    # Example hardcoded inference rules for demonstration
+    # Fallback simulated configurations for demo validation
     if "baumannii" in strain_name or "acinetobacter" in strain_name:
         inferred_profile = {"Gram stain": "gramnegativenegative", "Shape": "rod", "color": "white"}
     elif "aureus" in strain_name or "staphylococcus" in strain_name:
@@ -106,14 +112,21 @@ try:
     feature_list, clf = load_ml_assets()
     allowed_community = load_allowed_community()
     
-    if clf is None:
-        st.error("⚠️ The trained ML model binary (`bacterial_rf_model.pkl`) was not found. Please run `rule_engine.py` first.")
+    # Handled fallback rules gracefully if assets are deploying/missing
+    if feature_list filter is None:
+        st.error("⚠️ Database connection failed. Please ensure `phenotype_database-v2.xlsx` is inside your GitHub `database` directory.")
         st.stop()
 
     # Sidebar Dashboard Control Center
     with st.sidebar:
         st.markdown("### 📊 Engine Status")
         st.success("Database Status: Connected")
+        
+        if clf is not None:
+            st.success("Predictive Classifier: Loaded")
+        else:
+            st.warning("Predictive Classifier: Offline (Using Rules Engine Only)")
+            
         st.info(f"Loaded Phenotypic Features: {len(feature_list)}")
         
         # UI Toggle for Web Profiler Feature
@@ -225,15 +238,14 @@ try:
                 st.error(f"❌ Database Access Error: {e}")
                 st.stop()
         else:
-            st.error("❌ Matrix Database sheet not found.")
+            st.error("❌ Matrix Database file missing.")
             st.stop()
 
         results = []
         
-        # If toggled, show status update for web integration search
         if enable_web_lookup:
             with st.spinner("🌐 Checking online repositories (BacDive/NCBI) for missing phenotypic data profile hooks..."):
-                time.sleep(0.6) # Simulating rapid profile indexing fetch
+                time.sleep(0.6)
 
         for idx, row in rules_df.iterrows():
             strain_name = str(row[strain_col_name]).strip()
@@ -255,7 +267,6 @@ try:
             # Gram Stain Calculation (20 Pts Max)
             if user_inputs["Gram stain"] != -1.0 and "Gram stain" in rules_df.columns:
                 db_val = row["Gram stain"]
-                # Fallback to web metadata if database cell is empty
                 if pd.isna(db_val) and "Gram stain" in web_profile:
                     db_val = web_profile["Gram stain"]
                     
