@@ -27,55 +27,47 @@ st.markdown('<p class="main-title">EnzyCascade™</p>', unsafe_allow_html=True)
 st.markdown('<p class="tagline">Rule-Based Enzyme Cascade Bacterial Identification System</p>', unsafe_allow_html=True)
 st.markdown("---")
 
-# Constant Relative Paths for Streamlit Cloud
-RULE_PATH = os.path.join("database", "phenotype_database-v2.xlsx")
-PHENO_PATH = os.path.join("database", "phenotype_database-v2.xlsx")
-MODEL_PATH = os.path.join("database", "bacterial_rf_model.pkl")
+# UPDATED PATHS: Pointing to root directory
+RULE_PATH = "phenotype_database-v2.xlsx"
+PHENO_PATH = "phenotype_database-v2.xlsx"
+MODEL_PATH = "bacterial_rf_model.pkl"
 COMMUNITY_TXT_PATH = "bacterial community.txt"
 
 @st.cache_resource
 def load_ml_assets():
-    if not os.path.exists(MODEL_PATH):
+    if not os.path.exists(MODEL_PATH) or not os.path.exists(PHENO_PATH):
         return None, None
     try:
-        df_p = pd.read_excel(PHENO_PATH, sheet_name='Sheet1')
-    except Exception:
-        try:
-            df_p = pd.read_excel(PHENO_PATH, sheet_name=0)
-        except Exception:
-            return None, None
-            
-    features = [col for col in df_p.columns if col != 'strains.Full Scientific Name']
-    try:
+        df_p = pd.read_excel(PHENO_PATH, sheet_name=0)
+        features = [col for col in df_p.columns if col != 'strains.Full Scientific Name']
         model = joblib.load(MODEL_PATH)
+        return features, model
     except Exception:
-        return features, None
-    return features, model
+        return None, None
 
 def load_allowed_community():
     if os.path.exists(COMMUNITY_TXT_PATH):
         try:
             with open(COMMUNITY_TXT_PATH, 'r', encoding='utf-8') as f:
-                lines = [line.strip().lower() for line in f.readlines() if line.strip()]
-            return lines
+                return [line.strip().lower() for line in f.readlines() if line.strip()]
         except Exception:
-            pass
+            return []
     return []
 
 def fetch_bacterial_profile_from_web(strain_name):
-    inferred_profile = {"Gram stain": None, "Shape": None, "color": None}
+    # Simulated web hook
     if "baumannii" in strain_name or "acinetobacter" in strain_name:
-        inferred_profile = {"Gram stain": "gramnegativenegative", "Shape": "rod", "color": "white"}
+        return {"Gram stain": "gramnegativenegative", "Shape": "rod", "color": "white"}
     elif "aureus" in strain_name or "staphylococcus" in strain_name:
-        inferred_profile = {"Gram stain": "positive", "Shape": "coccus", "color": "yellow"}
-    return inferred_profile
+        return {"Gram stain": "positive", "Shape": "coccus", "color": "yellow"}
+    return {}
 
 try:
     feature_list, clf = load_ml_assets()
     allowed_community = load_allowed_community()
     
     if feature_list is None:
-        st.error("⚠️ Database connection failed. Ensure `phenotype_database-v2.xlsx` is in the `database/` folder.")
+        st.error("⚠️ Database connection failed. Ensure `phenotype_database-v2.xlsx` and `bacterial_rf_model.pkl` are in the main project folder.")
         st.stop()
 
     with st.sidebar:
@@ -84,7 +76,7 @@ try:
         enable_web_lookup = st.checkbox("Enable Automated Web Profile Fetching", value=True)
         st.markdown("---")
         st.markdown("### ⚙️ Scoring Thresholds")
-        st.markdown("- **Gram Stain/Shape:** 40 pts total\n- **Color:** 30 pts\n- **Enzyme Cascades:** 30 pts")
+        st.markdown("- **Gram/Shape/Color:** 70 pts\n- **Enzyme Cascades:** 30 pts")
 
     st.markdown('<p class="section-header">📋 Phase 1: Observed Laboratory Profiles</p>', unsafe_allow_html=True)
     user_inputs = {}
@@ -105,16 +97,16 @@ try:
     remaining_features = sorted([f for f in feature_list if f not in ["Gram stain", "Shape", "color"]])
     
     tab1, tab2, tab3, tab4 = st.tabs(["[A-D]", "[E-L]", "[M-R]", "[S-Z]"])
-    for i, tab in enumerate([tab1, tab2, tab3, tab4]):
+    for tab, features in zip([tab1, tab2, tab3, tab4], [remaining_features[0:len(remaining_features)//4], ...]): # Logic wrapper
         with tab:
             cols = st.columns(4)
-            for j, feat in enumerate([f for f in remaining_features if i*0 <= len(f)]): # Simplified display logic
+            for j, feat in enumerate(remaining_features):
                 with cols[j % 4]:
                     val = st.selectbox(f"{feat}:", ["Not Performed", "Negative", "Variable", "Positive"], key=f"ui_{feat}")
                     user_inputs[feat] = val.lower() if val != "Not Performed" else -1.0
 
     if st.button("🚀 Execute EnzyCascade™ Mapping", use_container_width=True):
-        rules_df = pd.read_excel(RULE_PATH, sheet_name=0)
+        rules_df = pd.read_excel(PHENO_PATH, sheet_name=0)
         strain_col = [c for c in rules_df.columns if "strain" in c.lower() or "name" in c.lower()][0]
         
         results = []
@@ -122,17 +114,13 @@ try:
             strain_name = str(row[strain_col]).lower()
             if allowed_community and not any(item in strain_name for item in allowed_community): continue
             
-            score = 0.0
-            web = fetch_bacterial_profile_from_web(strain_name) if enable_web_lookup else {}
+            score, web = 0.0, fetch_bacterial_profile_from_web(strain_name) if enable_web_lookup else {}
             
             for p in ["Gram stain", "Shape", "color"]:
                 db_v = str(row.get(p, "")).lower() if not pd.isna(row.get(p)) else web.get(p, "")
-                if user_inputs[p] != -1.0 and user_inputs[p] == db_v:
-                    score += 20.0 if p != "color" else 30.0
-                elif user_inputs[p] == -1.0:
-                    score += 20.0 if p != "color" else 30.0
+                if user_inputs[p] != -1.0 and user_inputs[p] == db_v: score += 20.0 if p != "color" else 30.0
+                elif user_inputs[p] == -1.0: score += 20.0 if p != "color" else 30.0
             
-            # Enzyme scoring
             e_match, e_total = 0, 0
             for f, v in user_inputs.items():
                 if f not in ["Gram stain", "Shape", "color"] and v != -1.0:
